@@ -1,3 +1,6 @@
 selenium
 transformers
 pandas
+moviepy
+google
+google.generativeai

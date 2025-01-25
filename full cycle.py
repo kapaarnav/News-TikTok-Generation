@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
 import transformers
+from moviepy import VideoFileClip, TextClip, CompositeVideoClip
+import google.generativeai as genai
 
 CHROME_DRIVER_PATH = "/Users/aarnavkapoor/Downloads/chromedriver-mac-arm64/chromedriver"
 service = Service(CHROME_DRIVER_PATH)
@@ -77,15 +79,9 @@ data = zip(frontPageLinks, titles, dates, texts)
 df = pd.DataFrame(data, columns=["link", "title", "date", "text"])
 
 
-def summarize_text(text):
-    summary = summarizer(
-            text,
-            max_length=150,
-            min_length=30,
-            do_sample=False
-        )
-    return summary[0]['summary_text']
+genai.configure(api_key="AIzaSyANmCjwB6DgM8MJgSsNEmReLKzZlStEQfE")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-summarizer = transformers.pipeline("summarization", model="facebook/bart-large-cnn")
-df["summary"] = df["text"].apply(summarize_text)
-df["summary"].to_csv('test.txt', index=False)
+article = df.iloc[10,0]
+response = model.generate_content(f"make the facts presented in this article as a character dialogue between spongebob and patrick, {article}")
+print(response.text)
