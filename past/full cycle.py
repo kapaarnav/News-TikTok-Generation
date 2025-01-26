@@ -4,11 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import pandas as pd
 import time
-import transformers
-from moviepy import VideoFileClip, TextClip, CompositeVideoClip
-import google.generativeai as genai
 
 CHROME_DRIVER_PATH = "/Users/aarnavkapoor/Downloads/chromedriver-mac-arm64/chromedriver"
 service = Service(CHROME_DRIVER_PATH)
@@ -74,14 +70,46 @@ for p in allText:
     # everything after is the article body
     texts.append(" ".join(c[9:-12]))
 
+import pandas as pd
+
 # make the dataframe from those columns and keep the original link for citations
 data = zip(frontPageLinks, titles, dates, texts)
 df = pd.DataFrame(data, columns=["link", "title", "date", "text"])
 
+import google.generativeai as genai
 
 genai.configure(api_key="AIzaSyANmCjwB6DgM8MJgSsNEmReLKzZlStEQfE")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 article = df.iloc[10,0]
-response = model.generate_content(f"make the facts presented in this article as a character dialogue between spongebob and patrick, {article}")
+response = model.generate_content(f"make the facts presented in this article as if spongebob and patrick were talking, {article}")
 print(response.text)
+
+from moviepy import VideoFileClip, TextClip, CompositeVideoClip
+from gtts import gTTS
+
+# Initialize gTTS object
+tts = gTTS(text=response.text, lang='en')
+
+# Save the audio file
+tts.save("script_audio.mp3")
+
+print("Audio file 'script_audio.mp3' has been created.")
+
+from pydub import AudioSegment
+
+audio = AudioSegment.from_file("script_audio.mp3")
+
+# Get duration in milliseconds
+duration_ms = len(audio)
+duration_sec = duration_ms / 1000
+print(f"Current audio duration: {duration_sec:.2f} seconds")
+
+max_duration = 45  # seconds
+
+if duration_sec > max_duration:
+    speed_factor = duration_sec / max_duration
+    print(f"Speeding up audio by a factor of {speed_factor:.2f}")
+else:
+    speed_factor = 1.0
+    print("Audio duration is within the limit. No speed adjustment needed.")

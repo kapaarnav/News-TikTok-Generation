@@ -4,3 +4,5 @@ pandas
 moviepy
 google
 google.generativeai
+gtts
+pyttsx3
